@@ -1,4 +1,5 @@
-// server/routes/expenditureRoutes.js
+// @ts-nocheck
+// routes/expenditureRoutes.js
 const express = require("express");
 const router  = express.Router();
 const {
@@ -9,39 +10,40 @@ const {
 } = require("../controllers/admin/expenditureController");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 
-const admin = [protect, authorizeRoles("admin")];
+// Roles that can manage expenditure
+const financeRoles = [protect, authorizeRoles("super_admin", "admin", "finance_admin")];
 
 // ─── Overview / Stats ─────────────────────────────────────────
-router.get("/stats",  ...admin, getExpenditureStats);
-router.get("/report", ...admin, getExpenditureReport);
+router.get("/stats",  ...financeRoles, getExpenditureStats);
+router.get("/report", ...financeRoles, getExpenditureReport);
 
 // ─── Expenses ─────────────────────────────────────────────────
 router.route("/expenses")
-    .get(...admin, getExpenses)
-    .post(...admin, createExpense);
+    .get( ...financeRoles, getExpenses)
+    .post(...financeRoles, createExpense);
 
 router.route("/expenses/:id")
-    .put(...admin, updateExpense)
-    .delete(...admin, deleteExpense);
+    .put(   ...financeRoles, updateExpense)
+    .delete(...financeRoles, deleteExpense);
 
 // ─── Income ───────────────────────────────────────────────────
 router.route("/income")
-    .get(...admin, getIncome)
-    .post(...admin, createIncome);
+    .get( ...financeRoles, getIncome)
+    .post(...financeRoles, createIncome);
 
 router.route("/income/:id")
-    .put(...admin, updateIncome)
-    .delete(...admin, deleteIncome);
+    .put(   ...financeRoles, updateIncome)
+    .delete(...financeRoles, deleteIncome);
 
 // ─── Advances ─────────────────────────────────────────────────
 router.route("/advances")
-    .get(...admin, getAdvances)
-    .post(...admin, createAdvance);
+    .get( ...financeRoles, getAdvances)
+    .post(...financeRoles, createAdvance);
 
 router.route("/advances/:id")
-    .put(...admin, updateAdvance)
-    .delete(...admin, deleteAdvance);
+    .put(   ...financeRoles, updateAdvance)
+    .delete(...financeRoles, deleteAdvance);
 
-router.patch("/advances/:id/clear", ...admin, clearAdvance);
+router.patch("/advances/:id/clear", ...financeRoles, clearAdvance);
 
 module.exports = router;

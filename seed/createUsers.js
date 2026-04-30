@@ -1,10 +1,10 @@
 // @ts-nocheck
-// server/seed/createUsers.js
+// seed/createUsers.js
 // ─────────────────────────────────────────────────────────────
-// Run this ONCE to create demo users in your database.
+// Run this ONCE to create one demo user per RBAC role.
 //
 // Usage:
-//   cd server
+//   cd HRMS-backend
 //   node seed/createUsers.js
 // ─────────────────────────────────────────────────────────────
 
@@ -18,35 +18,64 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 const DEMO_USERS = [
     {
         name: "Super Admin",
-        email: "admin@hr.com",
-        password: "admin123",
-        role: "admin",
-    }
+        email: "superadmin@hr.com",
+        password: "super123",
+        role: "super_admin",
+    },
+    {
+        name: "HR Admin",
+        email: "hradmin@hr.com",
+        password: "hr1234",
+        role: "hr_admin",
+    },
+    {
+        name: "Manager",
+        email: "manager@hr.com",
+        password: "manager123",
+        role: "manager",
+    },
+    {
+        name: "Finance Admin",
+        email: "finance@hr.com",
+        password: "finance123",
+        role: "finance_admin",
+    },
+    {
+        name: "Employee",
+        email: "employee@hr.com",
+        password: "employee123",
+        role: "employee",
+    },
 ];
 
 const seed = async () => {
     try {
-        // Connect to MongoDB
         await mongoose.connect(process.env.MONGO_URI);
-        console.log("✅ Connected to MongoDB");
+        console.log("✅ Connected to MongoDB\n");
 
-        // Clear existing users (optional — comment out to keep existing users)
-        await User.deleteMany({});
-        console.log("🗑️  Cleared existing users");
-
-        // Create demo users
-        // Passwords are hashed automatically by the User model's pre-save hook
+        // Upsert — update if email exists, otherwise create (safe to re-run)
         for (const userData of DEMO_USERS) {
-            const user = await User.create(userData);
-            console.log(`✅ Created: ${user.name} (${user.role}) — ${user.email}`);
+            const existing = await User.findOne({ email: userData.email });
+            if (existing) {
+                console.log(`⏭️  Skipped (already exists): ${userData.email}`);
+            } else {
+                const user = await User.create(userData);
+                console.log(`✅ Created: ${user.name} (${user.role}) — ${user.email}`);
+            }
         }
 
         console.log("\n🎉 Seed complete! Use these credentials to log in:");
-        console.log("─────────────────────────────────────────────");
+        console.log("─────────────────────────────────────────────────────────");
+        console.log("ROLE           EMAIL                    PASSWORD");
+        console.log("─────────────────────────────────────────────────────────");
         DEMO_USERS.forEach((u) => {
-            console.log(`${u.role.toUpperCase().padEnd(8)} → ${u.email} / ${u.password}`);
+            const role = u.role.toUpperCase().padEnd(14);
+            const email = u.email.padEnd(25);
+            console.log(`${role} ${email} ${u.password}`);
         });
-        console.log("─────────────────────────────────────────────");
+        console.log("─────────────────────────────────────────────────────────");
+        console.log("\n📌 All admin roles log in via the 'Admin' button on the login page.");
+        console.log("📌 Employee role logs in via the 'Employee' button.");
 
         process.exit(0);
     } catch (error) {

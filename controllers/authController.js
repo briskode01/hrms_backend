@@ -8,15 +8,16 @@ const {
     changeCurrentUserPassword,
     getUsers,
     toggleStatus,
+    changeUserRole,
 } = require("../services/auth/authService");
 const { sendTokenResponse } = require("../utils/authToken");
 
 const resolveStatusCode = (error, fallback = 500) => error?.statusCode || fallback;
 
-
 const register = async (req, res) => {
     try {
-        const user = await registerUser(req.body);
+        // Pass the requesting user's role so service can enforce admin-creation rules
+        const user = await registerUser(req.body, req.user?.role);
         return sendTokenResponse(user, 201, res, "Account created successfully! 🎉");
     } catch (error) {
         return res.status(resolveStatusCode(error, 400)).json({
@@ -43,10 +44,7 @@ const login = async (req, res) => {
 const getMe = async (req, res) => {
     try {
         const user = await getCurrentUserProfile(req.user._id);
-        return res.status(200).json({
-            success: true,
-            data: user,
-        });
+        return res.status(200).json({ success: true, data: user });
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -123,6 +121,28 @@ const toggleUserStatus = async (req, res) => {
     }
 };
 
+/** PUT /api/auth/users/:id/role — super_admin only */
+const updateUserRole = async (req, res) => {
+    try {
+        const { role } = req.body;
+        if (!role) {
+            return res.status(400).json({ success: false, message: "role is required in request body" });
+        }
+        const user = await changeUserRole(req.params.id, role, req.user.role);
+        return res.status(200).json({
+            success: true,
+            message: `User role updated to '${role}' successfully`,
+            data: user,
+        });
+    } catch (error) {
+        return res.status(resolveStatusCode(error, 500)).json({
+            success: false,
+            message: "Error updating user role",
+            error: error.message,
+        });
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -131,4 +151,5 @@ module.exports = {
     changePassword,
     getAllUsers,
     toggleUserStatus,
+    updateUserRole,
 };

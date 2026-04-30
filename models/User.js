@@ -25,9 +25,25 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ["admin", "hr", "employee"],
-            default: "hr",
+            enum: [
+                // ── New RBAC roles ────────────────────────────────
+                "super_admin",   // Full system access
+                "hr_admin",      // Employee lifecycle, attendance, leaves
+                "manager",       // Team-scoped: leave approval, team reports
+                "finance_admin", // Payroll, wages, expenditure
+                "employee",      // Self-service
+                // ── Legacy aliases (kept until migration) ─────────
+                "admin",
+                "hr",
+            ],
+            default: "employee",
         },
+
+        /** Manager's assigned team — populated for role === 'manager' */
+        managedTeam: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Employee",
+        }],
 
         employee: {
             type: mongoose.Schema.Types.ObjectId,

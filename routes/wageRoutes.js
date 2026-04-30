@@ -1,19 +1,23 @@
-// server/routes/wageRoutes.js
+// @ts-nocheck
+// routes/wageRoutes.js
 const express = require("express");
 const router = express.Router();
 const { createWage, getWages, markWageAsPaid, deleteWage } = require("../controllers/admin/wageController");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 
-// GET  /api/wages       — fetch all wage records (admin only)
-router.get("/", protect, authorizeRoles("admin"), getWages);
+// Roles that can manage wages
+const wageManagers = ["super_admin", "finance_admin"];
 
-// POST /api/wages       — create a new wage record (admin only)
-router.post("/", protect, authorizeRoles("admin"), createWage);
+// GET  /api/wages            — fetch all wage records
+router.get("/", protect, authorizeRoles(...wageManagers), getWages);
 
-// PUT  /api/wages/:id/mark-paid — mark as paid (admin only)
-router.put("/:id/mark-paid", protect, authorizeRoles("admin"), markWageAsPaid);
+// POST /api/wages            — create a new wage record
+router.post("/", protect, authorizeRoles(...wageManagers), createWage);
 
-// DELETE /api/wages/:id — delete a wage record (admin only)
-router.delete("/:id", protect, authorizeRoles("admin"), deleteWage);
+// PUT  /api/wages/:id/mark-paid — mark as paid
+router.put("/:id/mark-paid", protect, authorizeRoles(...wageManagers), markWageAsPaid);
+
+// DELETE /api/wages/:id     — delete (super_admin only)
+router.delete("/:id", protect, authorizeRoles("super_admin"), deleteWage);
 
 module.exports = router;

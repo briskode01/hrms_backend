@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 const express = require("express");
 const router = express.Router();
 
@@ -15,19 +15,22 @@ const {
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 const { validateCreateJobInput } = require("../middleware/jobValidationMiddleware");
 
-// ─── PUBLIC routes (no token needed) ──────────────────────────
-router.get("/public", getPublicJobs);       // browse all active jobs
-router.get("/public/:id", getPublicJobById);    // view single job
+// Roles that can manage recruitment
+const recruitmentManagers = ["super_admin", "hr_admin"];
 
-// ─── PRIVATE routes (HR / Admin only) ─────────────────────────
-router.get("/stats", protect, authorizeRoles("admin"), getRecruitmentStats);
+// ─── PUBLIC routes (no token needed) ──────────────────────────
+router.get("/public",     getPublicJobs);
+router.get("/public/:id", getPublicJobById);
+
+// ─── PRIVATE routes ───────────────────────────────────────────
+router.get("/stats", protect, authorizeRoles(...recruitmentManagers), getRecruitmentStats);
 
 router.route("/")
-    .get(protect, authorizeRoles("admin"), getAllJobs)
-    .post(protect, authorizeRoles("admin"), validateCreateJobInput, createJob);
+    .get(protect,  authorizeRoles(...recruitmentManagers), getAllJobs)
+    .post(protect, authorizeRoles(...recruitmentManagers), validateCreateJobInput, createJob);
 
 router.route("/:id")
-    .put(protect, authorizeRoles("admin"), updateJob)
-    .delete(protect, authorizeRoles("admin"), deleteJob);
+    .put(protect,    authorizeRoles(...recruitmentManagers), updateJob)
+    .delete(protect, authorizeRoles("super_admin"), deleteJob);
 
 module.exports = router;

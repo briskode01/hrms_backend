@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 const express = require("express");
 const router = express.Router();
 
@@ -11,24 +11,52 @@ const {
     getEmployeeStats,
 } = require("../controllers/admin/employeeController");
 
-const { protect, authorizeRoles } = require("../middleware/authMiddleware");
+const { protect, authorizeRoles, authorizePermission } = require("../middleware/authMiddleware");
 const { validateCreateEmployeeInput } = require("../middleware/employeeValidationMiddleware");
 const { uploadEmployeeDocs } = require("../middleware/uploadMiddleware");
 
-// Stats route — admin + hr
-router.get("/stats/summary", protect, authorizeRoles("admin"), getEmployeeStats);
+// Stats — super_admin, hr_admin, manager
+router.get(
+    "/stats/summary",
+    protect,
+    authorizeRoles("super_admin", "admin", "hr_admin", "manager"),
+    getEmployeeStats
+);
 
-// List + Create
+// List — all admin roles + employee (employee sees limited view, enforced in controller)
 router
     .route("/")
-    .get(protect, authorizeRoles("admin", "employee"), getAllEmployees)
-    .post(protect, authorizeRoles("admin"), uploadEmployeeDocs, validateCreateEmployeeInput, createEmployee);
+    .get(
+        protect,
+        authorizeRoles("super_admin", "admin", "hr_admin", "manager", "finance_admin", "employee"),
+        getAllEmployees
+    )
+    .post(
+        protect,
+        authorizeRoles("super_admin", "admin", "hr_admin"),
+        uploadEmployeeDocs,
+        validateCreateEmployeeInput,
+        createEmployee
+    );
 
-// Single + Update + Delete
+// Single — same as list; update + delete limited to super_admin, hr_admin
 router
     .route("/:id")
-    .get(protect, authorizeRoles("admin", "employee"), getEmployeeById)
-    .put(protect, authorizeRoles("admin"), uploadEmployeeDocs, updateEmployee)
-    .delete(protect, authorizeRoles("admin"), deleteEmployee); // admin only
+    .get(
+        protect,
+        authorizeRoles("super_admin", "admin", "hr_admin", "manager", "finance_admin", "employee"),
+        getEmployeeById
+    )
+    .put(
+        protect,
+        authorizeRoles("super_admin", "admin", "hr_admin"),
+        uploadEmployeeDocs,
+        updateEmployee
+    )
+    .delete(
+        protect,
+        authorizeRoles("super_admin", "admin"),
+        deleteEmployee
+    );
 
 module.exports = router;

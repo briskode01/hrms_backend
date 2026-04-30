@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 const express = require("express");
 const router = express.Router();
 
@@ -10,91 +10,48 @@ const {
     changePassword,
     getAllUsers,
     toggleUserStatus,
+    updateUserRole,
 } = require("../controllers/authController");
 
-const { protect, authorizeRoles } = require("../middleware/authMiddleware");
+const { protect, authorizeRoles, authorizePermission } = require("../middleware/authMiddleware");
 const {
     validateRegisterInput,
     validateLoginInput,
     validateChangePasswordInput,
 } = require("../middleware/authValidationMiddleware");
 
-// ─── Public Routes (no token needed) ──────────────────────────
-
-// POST /api/auth/register  → register new user
+// ─── Public Routes ────────────────────────────────────────────
 router.post("/register", validateRegisterInput, register);
-
-
-
-
-// POST /api/auth/login     → login and get token
-
-/**
- * @swagger
- * /api/auth/login:
- *   post:
- *     summary: Login user and get JWT token
- *     tags: [Auth]
- *     security: [] 
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *               - role
- *             properties:
- *               email:
- *                 type: string
- *                 example: admin@hr.com
- *               password:
- *                 type: string
- *                 example: admin123
- *               role:
- *                 type: string
- *                 enum: [admin, user]
- *                 example: admin
- *     responses:
- *       200:
- *         description: Login successful
- *       401:
- *         description: Invalid credentials
- */
 router.post("/login", validateLoginInput, login);
 
-// ─── Private Routes (token required) ──────────────────────────
-
-/**
- * @swagger
- * /api/auth/me:
- *   get:
- *     summary: Get current logged-in user profile
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Successfully fetched user profile
- *       401:
- *         description: Unauthorized
- */
+// ─── Private Routes ───────────────────────────────────────────
 router.get("/me", protect, getMe);
-
-// PUT /api/auth/update-profile  → update name/email
 router.put("/update-profile", protect, updateProfile);
-
-// PUT /api/auth/change-password → change password
 router.put("/change-password", protect, validateChangePasswordInput, changePassword);
 
-// ─── Admin Only Routes ────────────────────────────────────────
+// ─── User Management (super_admin + legacy admin only) ────────
+// GET all users
+router.get(
+    "/users",
+    protect,
+    authorizeRoles("super_admin", "admin"),
+    getAllUsers
+);
 
-// GET /api/auth/users           → get all users (admin only)
-router.get("/users", protect, authorizeRoles("admin"), getAllUsers);
+// Toggle user active status — super_admin & hr_admin
+router.put(
+    "/users/:id/toggle-status",
+    protect,
+    authorizeRoles("super_admin", "admin", "hr_admin"),
+    toggleUserStatus
+);
 
-// PUT /api/auth/users/:id/toggle-status → activate/deactivate user
-router.put("/users/:id/toggle-status", protect, authorizeRoles("admin"), toggleUserStatus);
+// Change a user's role — super_admin only
+router.put(
+    "/users/:id/role",
+    protect,
+    authorizeRoles("super_admin", "admin"),
+    updateUserRole
+);
 
 module.exports = router;

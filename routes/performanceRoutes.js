@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 const express = require("express");
 const router = express.Router();
 const {
@@ -8,13 +8,18 @@ const {
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 const { validateCreateReviewInput } = require("../middleware/performanceValidationMiddleware");
 
-router.get("/stats/summary", protect, authorizeRoles("admin"), getPerformanceStats);
+// Roles that can manage performance reviews
+const performanceManagers = ["super_admin", "hr_admin", "manager"];
+
+router.get("/stats/summary", protect, authorizeRoles(...performanceManagers), getPerformanceStats);
+
 router.route("/")
-    .get(protect, authorizeRoles("admin", "employee"), getReviews)
-    .post(protect, authorizeRoles("admin"), validateCreateReviewInput, createReview);
+    .get(protect,  authorizeRoles(...performanceManagers, "employee"), getReviews)
+    .post(protect, authorizeRoles(...performanceManagers), validateCreateReviewInput, createReview);
+
 router.route("/:id")
-    .get(protect, authorizeRoles("admin", "employee"), getReviewById)
-    .put(protect, authorizeRoles("admin"), updateReview)
-    .delete(protect, authorizeRoles("admin"), deleteReview);
+    .get(protect,    authorizeRoles(...performanceManagers, "employee"), getReviewById)
+    .put(protect,    authorizeRoles(...performanceManagers), updateReview)
+    .delete(protect, authorizeRoles("super_admin"), deleteReview);
 
 module.exports = router;
