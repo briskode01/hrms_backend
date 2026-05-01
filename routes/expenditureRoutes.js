@@ -6,9 +6,10 @@ const {
     getExpenses, createExpense, updateExpense, deleteExpense,
     getIncome,   createIncome,  updateIncome,  deleteIncome,
     getAdvances, createAdvance, updateAdvance, deleteAdvance, clearAdvance,
-    getExpenditureStats, getExpenditureReport,
+    getExpenditureStats, getExpenditureReport, uploadPnlReport,
 } = require("../controllers/admin/expenditureController");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
+const { uploadPnlReport: uploadPnlReportMiddleware } = require("../middleware/reportUploadMiddleware");
 
 // Roles that can manage expenditure
 const financeRoles = [protect, authorizeRoles("super_admin", "admin", "finance_admin")];
@@ -16,6 +17,7 @@ const financeRoles = [protect, authorizeRoles("super_admin", "admin", "finance_a
 // ─── Overview / Stats ─────────────────────────────────────────
 router.get("/stats",  ...financeRoles, getExpenditureStats);
 router.get("/report", ...financeRoles, getExpenditureReport);
+router.post("/reports/pnl-upload", ...financeRoles, uploadPnlReportMiddleware, uploadPnlReport);
 
 // ─── Expenses ─────────────────────────────────────────────────
 router.route("/expenses")

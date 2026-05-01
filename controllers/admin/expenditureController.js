@@ -121,9 +121,28 @@ const getExpenditureReport = async (req, res) => {
     } catch (e) { fail(res, e, "Error generating expenditure report"); }
 };
 
+const uploadPnlReport = async (req, res) => {
+    try {
+        if (!req.file) {
+            return fail(res, { statusCode: 400, message: "P&L PDF is required" }, "Please upload a P&L PDF", 400);
+        }
+
+        const month = Number(req.body.month) || new Date().getMonth() + 1;
+        const year = Number(req.body.year) || new Date().getFullYear();
+
+        ok(res, {
+            fileUrl: `/uploads/reports/${req.file.filename}`,
+            filename: req.file.filename,
+            month,
+            year,
+            uploadedAt: new Date().toISOString(),
+        }, 201);
+    } catch (e) { fail(res, e, "Error uploading P&L report", 400); }
+};
+
 module.exports = {
     getExpenses, createExpense, updateExpense, deleteExpense,
     getIncome, createIncome, updateIncome, deleteIncome,
     getAdvances, createAdvance, updateAdvance, deleteAdvance, clearAdvance,
-    getExpenditureStats, getExpenditureReport,
+    getExpenditureStats, getExpenditureReport, uploadPnlReport,
 };
