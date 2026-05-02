@@ -10,7 +10,7 @@ const jobSchema = new mongoose.Schema(
         },
         department: {
             type: String,
-            enum: ["Engineering", "Marketing", "HR", "Finance", "Sales", "Operations", "Design"],
+            enum: ["Engineering", "Marketing", "HR", "Finance", "Sales", "Operations", "Design", "Freelancing", "Others"],
             required: [true, "Department is required"],
         },
         location: {

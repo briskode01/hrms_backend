@@ -27,6 +27,6 @@ router
     .route("/:id")
     .get(protect,    authorizeRoles(...payrollManagers, "hr_admin", "manager", "employee"), getPayrollById)
     .put(protect,    authorizeRoles(...payrollManagers), updatePayroll)
-    .delete(protect, authorizeRoles("super_admin", "admin"), deletePayroll);
+    .delete(protect, authorizeRoles(...payrollManagers), deletePayroll);
 
 module.exports = router;

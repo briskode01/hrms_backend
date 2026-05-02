@@ -56,6 +56,7 @@ app.use("/api/announcements", require("./routes/announcementRoutes"));
 app.use("/api/wages", require("./routes/wageRoutes"));
 app.use("/api/workers", require("./routes/workerRoutes"));
 app.use("/api/expenditure", require("./routes/expenditureRoutes"));
+app.use("/api/settings", require("./routes/settingsRoutes"));
 // ─── Start Server ──────────────────────────────────────────────
 const PORT = process.env.PORT || 7000;
 app.listen(PORT, () => {

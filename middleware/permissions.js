@@ -23,6 +23,7 @@ const ROLE_PERMISSIONS = {
         "manage_expenditure",  // Expenses, income, advances
         "manage_wages",        // Wage records
         "view_reports",        // All financial & HR reports
+        "manage_organization", // Organization, bank, EPF/ESIC settings
         "manage_settings",     // System-wide settings
         "manage_recruitment",  // Job postings, applications
         "manage_tasks",        // Create/assign/delete tasks

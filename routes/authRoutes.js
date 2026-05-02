@@ -11,6 +11,7 @@ const {
     getAllUsers,
     toggleUserStatus,
     updateUserRole,
+    createUser,
 } = require("../controllers/authController");
 
 const { protect, authorizeRoles, authorizePermission } = require("../middleware/authMiddleware");
@@ -52,6 +53,14 @@ router.put(
     protect,
     authorizeRoles("super_admin", "admin"),
     updateUserRole
+);
+
+// Create new user — super_admin only
+router.post(
+    "/create-user",
+    protect,
+    authorizeRoles("super_admin", "admin"),
+    createUser
 );
 
 module.exports = router;
