@@ -3,6 +3,8 @@ services:
     image: mongo:7
     container_name: hrms_mongo
     restart: always
+    env_file:
+      - .env
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
@@ -21,6 +23,8 @@ services:
       - mongodb
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       MONGO_URI: mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017/admin?authSource=admin
