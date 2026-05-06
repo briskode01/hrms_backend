@@ -37,6 +37,15 @@ app.get("/", (req, res) => {
   res.json({ message: "✅ HR API is running!" });
 });
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "Server is healthy 🚀",
+    timestamp: new Date(),
+    uptime: process.uptime(), // seconds
+  });
+});
+
 // API Routes
 app.use("/api/employees", require("./routes/employeeRoutes"));
 app.use("/api/attendance", require("./routes/attendanceRoutes"));
