@@ -48,9 +48,14 @@ const getDashboardStats = async () => {
   const attendanceSummary = createAttendanceSummary(attendanceToday);
 
   const payrollRecords = await Payroll.find({ month: currentMonth, year: currentYear });
-  const totalPayroll = payrollRecords.reduce((sum, payroll) => sum + (payroll.netSalary || 0), 0);
-  const paidCount = payrollRecords.filter((payroll) => payroll.status === "Paid").length;
-  const pendingCount = payrollRecords.filter((payroll) => payroll.status !== "Paid").length;
+  const totalPayroll = payrollRecords.reduce((sum, payroll) => {
+    const ear = payroll.earnings || {};
+    const ded = payroll.deductions || {};
+    const netPay = (ear.basic || 0) + (ear.hra || 0) + (ear.bonus || 0) - ((ded.pf || 0) + (ded.esi || 0) + (ded.ptax || 0) + (ded.leaveDeduction || 0));
+    return sum + netPay;
+  }, 0);
+  const paidCount = payrollRecords.filter((payroll) => payroll.payment?.status === "Paid").length;
+  const pendingCount = payrollRecords.filter((payroll) => payroll.payment?.status !== "Paid").length;
 
   const performanceRecords = await Performance.find({ year: currentYear });
   const avgScore = performanceRecords.length > 0

@@ -55,7 +55,7 @@ router
     )
     .delete(
         protect,
-        authorizeRoles("super_admin", "admin"),
+        authorizeRoles("super_admin", "admin", "hr_admin"),
         deleteEmployee
     );
 

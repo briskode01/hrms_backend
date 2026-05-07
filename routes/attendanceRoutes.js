@@ -42,6 +42,6 @@ router
 router
     .route("/:id")
     .put(protect,    authorizeRoles(...attendanceAdmins), updateAttendance)
-    .delete(protect, authorizeRoles("super_admin", "admin"), deleteAttendance);
+    .delete(protect, authorizeRoles(...attendanceAdmins), deleteAttendance);
 
 module.exports = router;

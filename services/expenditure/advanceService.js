@@ -37,7 +37,7 @@ const clearAdvance = async (id) => {
     advance.status = "Cleared";
     advance.paid   = advance.amount;
     await advance.save();
-    return advance;
+    return advance.populate("employee", EMPLOYEE_FIELDS);
 };
 
 const getActiveAdvanceOutstanding = async () => {
